@@ -4,6 +4,7 @@ class fresh_selected_articles extends Plugin {
   private $dbh;
   private $dummy_id;
   private $from_part;
+  private $unwanted_feeds;
   private $where_part;
 
   function about() {
@@ -14,6 +15,7 @@ class fresh_selected_articles extends Plugin {
   }
 
   function init($host) {
+    $this->unwanted_feeds = "249, 250, 553"; // w/o gulli & hn & caj
     $this->host = $host;
     $this->dbh = $host->get_dbh();
     $this->dummy_id = $host->add_feed(-1, __("Fresh selected articles"), 'images/score_high.png', $this);
@@ -22,11 +24,12 @@ class fresh_selected_articles extends Plugin {
         ttrss_entries,ttrss_user_entries,ttrss_feeds ";
     $this->where_part = "
       WHERE
+        ttrss_user_entries.feed_id NOT IN (".$this->unwanted_feeds.") AND
         ttrss_user_entries.feed_id = ttrss_feeds.id AND
         ttrss_user_entries.ref_id = ttrss_entries.id AND
         ttrss_user_entries.owner_uid = '".$_SESSION["uid"]."' AND
         unread = true AND
-        date_entered > SUBDATE(NOW(), 3)";
+        date_entered > DATE_SUB(NOW(), INTERVAL ".get_pref("FRESH_ARTICLE_MAX_AGE")." HOUR)";
   }
 
   function get_unread($feed_id) {
