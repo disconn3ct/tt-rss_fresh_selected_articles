@@ -40,7 +40,7 @@ class fresh_selected_articles extends Plugin {
 
   function get_unwanted() {
     /* this function is used as dirty workaround to the restriction that host->get() is not possible in init() */
-    $query_unwanted_feeds = "SELECT content as freshselected FROM `ttrss_plugin_storage` WHERE name='fresh_selected_articles' AND owner_uid=".$_SESSION['uid'];
+    $query_unwanted_feeds = "SELECT content as freshselected FROM ttrss_plugin_storage WHERE name='fresh_selected_articles' AND owner_uid=".$_SESSION['uid'];
     $result1 = db_query($query_unwanted_feeds);
     if ($result1) {
       $json_serialized = db_fetch_result($result1, 0, "freshselected");
