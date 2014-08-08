@@ -21,14 +21,19 @@ class fresh_selected_articles extends Plugin {
     $this->from_part = "
       FROM
         ttrss_entries,ttrss_user_entries,ttrss_feeds ";
+
+    if (DB_TYPE == "pgsql") {
+	    $time_part = "date_entered > NOW() - INTERVAL '".get_pref("FRESH_ARTICLE_MAX_AGE")." hour' ";
+    } else {
+	    $time_part = "date_entered > DATE_SUB(NOW(), INTERVAL ".get_pref("FRESH_ARTICLE_MAX_AGE")." HOUR) ";
+    }
     $this->where_part = "
       WHERE
         ttrss_user_entries.feed_id NOT IN (%UNWANTED_FEEDS%) AND
         ttrss_user_entries.feed_id = ttrss_feeds.id AND
         ttrss_user_entries.ref_id = ttrss_entries.id AND
         ttrss_user_entries.owner_uid = '".$_SESSION["uid"]."' AND
-        unread = true AND
-        date_entered > DATE_SUB(NOW(), INTERVAL ".get_pref("FRESH_ARTICLE_MAX_AGE")." HOUR)";
+        unread = true AND ".$time_part;
 
     $host->add_hook($host::HOOK_PREFS_TAB, $this);
   }
